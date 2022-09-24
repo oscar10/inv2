@@ -27,16 +27,16 @@ services:
     image: bitinv2
     build:
       dockerfile: Dockerfile
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
-      - "traefik.http.routers.n8n-secure.entrypoints=websecure"
-      - "traefik.http.routers.n8n-secure.rule=Host(`bitproject.inventapro.com`)"
-      - "traefik.http.services.n8n-websocket.loadbalancer.server.port=8001"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.docker.network=traefik"
+    #   - "traefik.http.routers.app-secure.entrypoints=websecure"
+    #   - "traefik.http.routers.app-secure.rule=Host(`bitproject.inventapro.com`)"
+    #   - "traefik.http.services.app-websocket.loadbalancer.server.port=8001"
     env_file:
       - .env.prod
-    volumes:
-      - ./storage:/app/storage
+    # volumes:
+    #   - ./storage:/app/storage
     ports:
       - "8001:80"
     restart: always
@@ -55,5 +55,5 @@ volumes:
   data.redis:
 networks:
   default:
-    external: true
+    # external: true
     name: core_proxy

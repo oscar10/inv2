@@ -1,6 +1,6 @@
 /.zip
 /node_modules
-/public/hot
+# /public/hot
 /public/storage
 /storage/*.key
 /vendor
@@ -13,13 +13,12 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 phpunit.dusk.xml
-/public/dist
-/public/build
-/public/mix-manifest.json
+# /public/dist
+# /public/build
+# /public/mix-manifest.json
 /.idea
 /.vscode
 .zip
 digitalocean-info.txt
 !storage/backup/
 # Ignore the _volumes folder
-/_volumes/*
