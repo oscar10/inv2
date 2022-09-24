@@ -1,0 +1,36 @@
+# FROM composer:2.4.1 as build
+
+# COPY . /app/
+
+# WORKDIR /app
+
+# COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+
+FROM php:8.0-apache-buster as production
+
+RUN docker-php-ext-configure opcache --enable-opcache && \
+    docker-php-ext-install pdo pdo_mysql
+COPY docker/php/conf.d/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# COPY --from=build /app /var/www/html
+# Copy Composer binary from the Composer official Docker image
+COPY --from=composer:2.4.1 /usr/bin/composer /usr/bin/composer
+COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+
+WORKDIR /app
+
+COPY . .
+COPY .env.prod /var/www/html/.env
+
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache && \
+    chmod 777 -R /var/www/html/storage/ && \
+    chown -R www-data:www-data /var/www/ && \
+    a2enmod rewrite

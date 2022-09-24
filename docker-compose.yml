@@ -1,0 +1,86 @@
+version: '3.9'
+services:
+  mariadb:
+    image: mariadb:10.7
+    container_name: mariabd_inv
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - ./docker/bd/acculance.sql:/docker-entrypoint-initdb.d/inventapro.sql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - 'mariadb-data:/var/lib/mysql'
+    networks:
+      - default
+    restart: unless-stopped
+    # healthcheck:
+    #   test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+    #   retries: 3
+    #   timeout: 5s
+  app:
+    image: webp
+    # environment:
+    # https://community.traefik.io/t/traefik-webdevops-php-nginx-7-4-alpine-http-https-mixed/11403
+      # - WEB_DOCUMENT_ROOT=/app/public
+      # - PHP_DISPLAY_ERRORS=1
+      # - PHP_MEMORY_LIMIT=2048M
+      # - PHP_MAX_EXECUTION_TIME=-1
+      # - PHP_UPLOAD_MAX_FILESIZE https://dockerfile.readthedocs.io/en/latest/content/DockerImages/dockerfiles/php-nginx.html
+      # - XDEBUG_MODE=debug
+      # - XDEBUG_START_WITH_REQUEST=yes
+      # - XDEBUG_CLIENT_PORT=9000
+      # - XDEBUG_CLIENT_HOST=host.docker.internal
+      # - XDEBUG_MAX_NESTING_LEVEL=1000
+    build:
+      dockerfile: Dockerfile
+    env_file:
+      - .env.prod
+    volumes:
+      - ./storage:/app/storage
+    ports:
+      - "8001:80"
+    restart: unless-stopped
+    networks:
+      - default
+  # node:
+  #   image: node:15-alpine
+  #   working_dir: /var/www
+  #   volumes:
+  #     - ./:/var/www
+  #     - /var/www/node_modules
+  #   command: sh /var/www/node_start.sh
+  #   depends_on:
+  #     - app
+  redis:
+    image: redis:6
+    volumes:
+      - 'data.redis:/data'
+    networks:
+      - default
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+volumes:
+  mariadb-data:
+    driver: local
+  data.redis:
+    driver: local
+networks:
+  default:
+    driver: bridge
+# version: '3.9'
+# services:
+#   php:
+#     image: serversideup/php:8.1-fpm-nginx
+#     working_dir: /var/www/html
+
+#   mariadb:
+#     image: mariadb:10.7
+
+#   node:
+#     image: node:lts
